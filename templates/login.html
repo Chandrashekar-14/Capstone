@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart College System - Login</title>
+
+    {% load static %}
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Title -->
+    <div class="college-banner">
+        <span class="college-name">SMART COLLEGE SYSTEM</span>
+    </div>
+
+    <!-- Login Form -->
+    <section class="login">
+        <form class="login-form" method="POST">
+
+            {% csrf_token %}
+
+            <h1>Login</h1>
+
+            <!-- Django Error Message -->
+            {% if error %}
+                <label class="login-error-msg" style="display:block;">
+                    {{ error }}
+                </label>
+            {% endif %}
+
+            <!-- Email / Username -->
+            <div class="inputbox">
+                <span class="material-symbols-outlined">mail</span>
+                <input type="text" name="email" required>
+                <label>Email / Username</label>
+            </div>
+
+            <!-- Password -->
+            <div class="inputbox">
+                <span class="material-symbols-outlined">lock</span>
+                <input type="password" name="password" required>
+                <label>Password</label>
+            </div>
+
+            <!-- Remember -->
+            <div class="forget">
+                <label><input type="checkbox"> Remember Me</label>
+                <a href="#">Forgot Password?</a>
+            </div>
+
+            <!-- Button -->
+            <button type="submit" class="button">Log in</button>
+
+            <div class="register">
+                <p>Don't have an account? <a href="#">Register</a></p>
+            </div>
+
+        </form>
+    </section>
+
+</body>
+</html>

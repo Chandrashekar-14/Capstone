@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>🎓 Student</h2>
+
+    <ul>
+        <li><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'student_profile' %}">My Profile</a></li>
+        <li><a href="{% url 'placement_insights' %}" target="_blank">Placement Insights</a></li>
+        <li><a href="{% url 'skill_gap' %}" target="_blank">Skill Gap Analyzer</a></li>
+        <li><a href="{% url 'readiness_score' %}" target="_blank">Readiness Score</a></li>
+        <li><a href="{% url 'logout' %}" target="_blank">Logout</a></li>
+    </ul>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+
+    <!-- Header -->
+    <div class="topbar">
+        <h1>SMART COLLEGE ANALYTICS SYSTEM (STUDENT PANEL)</h1>
+    </div>
+
+    <!-- Announcement Section -->
+    <div class="table-section">
+
+        <h2 style="text-align:center;">ANNOUNCEMENTS</h2>
+
+        <div style="margin-top: 20px;">
+            <p>📢 New company visiting next week</p>
+            <p>📢 Resume submission deadline: Friday</p>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

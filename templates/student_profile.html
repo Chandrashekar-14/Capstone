@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ student.name }} - Profile</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+</head>
+<body class="profile-page-bg">
+
+<div class="main profile-page">
+
+    <!-- Top row: 2 columns -->
+    <div class="top-row">
+        <!-- Left: Basic Info -->
+        <div class="profile-container info-container">
+            <h2>👨‍🎓 Student Info</h2>
+            <p><strong>Name:</strong> {{ student.name }}</p>
+            <p><strong>Branch:</strong> {{ student.branch }}</p>
+            <p><strong>Year:</strong> {{ student.year }}</p>
+            <p><strong>CGPA:</strong> {{ student.cgpa }}</p>
+        </div>
+
+        <!-- Right: Placement Readiness -->
+        <div class="profile-container readiness-container">
+            <h2>📊 Placement Readiness</h2>
+            <div class="progress-bar">
+                <div class="progress" style="width: {{ student.readiness_score }}%;"></div>
+            </div>
+            <p>{{ student.readiness_score }}%</p>
+        </div>
+    </div>
+
+    <!-- Bottom row: Achievements -->
+    <div class="profile-container achievements-container">
+        <h2>🏆 Achievements</h2>
+        <ul>
+            {% for achievement in student.achievements %}
+            <li>✔ {{ achievement }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>
