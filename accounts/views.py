@@ -12,7 +12,8 @@ from .ml_skill_gap import train_model, analyze_student
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
-from django.db.models import Q
+from django.db.models import Q, Avg
+from django.db import models
 import json
 from .scoring import calculate_readiness_score, get_readiness_status, calculate_average_readiness
 
@@ -39,6 +40,7 @@ def login_view(request):
 
 @login_required
 def student_dashboard(request):
+    from .models import Company
     
     if request.user.role != 'student':
         return redirect('login')
@@ -49,10 +51,14 @@ def student_dashboard(request):
     readiness_score = calculate_readiness_score(student)
     prediction_status = get_readiness_status(readiness_score)
 
+    # Get all active companies for announcements
+    companies = Company.objects.all().order_by('-created_at')[:6]  # Show latest 6 companies
+
     return render(request, 'student_dashboard.html', {
         'student': student,
         'readiness_score': readiness_score,
-        'prediction_status': prediction_status
+        'prediction_status': prediction_status,
+        'companies': companies
     })
 
 
@@ -396,21 +402,196 @@ def student_list(request):
             Q(company__icontains=query)
         )
 
-    return render(request, 'students.html', {'students': students})
-
-def companies_list(request):
-    # Get all students who are placed and have a company
-    placed_students = Student.objects.filter(placed=True).exclude(company__isnull=True).exclude(company='')
+    # Calculate readiness scores and prepare enriched student data
+    students_data = []
+    total_academics = 0
+    total_skills = 0
+    total_practice = 0
+    total_projects = 0
+    total_aptitude = 0
     
-    # Extract unique companies and count placements
+    for student in students:
+        readiness_score = calculate_readiness_score(student)
+        status = get_readiness_status(readiness_score)
+        students_data.append({
+            'student': student,
+            'readiness_score': readiness_score,
+            'status': status,
+        })
+        total_academics += student.academics
+        total_skills += student.skills
+        total_practice += student.practice
+        total_projects += student.projects
+        total_aptitude += student.aptitude
+    
+    # Sort by readiness score (lowest first) to show students needing attention
+    students_data.sort(key=lambda x: x['readiness_score'])
+    
+    # Calculate overall averages
+    count = len(students_data) if students_data else 1
+    avg_academics = round(total_academics / count, 2)
+    avg_skills = round(total_skills / count, 2)
+    avg_practice = round(total_practice / count, 2)
+    avg_projects = round(total_projects / count, 2)
+    avg_aptitude = round(total_aptitude / count, 2)
+    
+    # Placement statistics
+    placed_students = students.filter(placed=True)
+    not_placed_students = students.filter(placed=False)
+    placement_percentage = round((placed_students.count() / students.count() * 100), 1) if students.count() > 0 else 0
+    
+    # Students needing attention (lowest readiness)
+    students_needing_attention = students_data[:5]  # Bottom 5 students
+    
+    # Company-wise placement
+    company_placement = Counter([s.company for s in placed_students if s.company])
+    
+    context = {
+        'students_data': students_data,
+        'total_students': students.count(),
+        'placed_count': placed_students.count(),
+        'not_placed_count': not_placed_students.count(),
+        'placement_percentage': placement_percentage,
+        'avg_academics': avg_academics,
+        'avg_skills': avg_skills,
+        'avg_practice': avg_practice,
+        'avg_projects': avg_projects,
+        'avg_aptitude': avg_aptitude,
+        'students_needing_attention': students_needing_attention,
+        'company_placement': dict(company_placement),
+        'query': query or '',
+    }
+    
+    return render(request, 'students.html', context)
+
+@login_required
+def companies_list(request):
+    from .models import Company
+    
+    # Only placement officers can upload, but students can view
+    is_placement_officer = request.user.role == 'placement'
+    
+    # Handle company creation (POST request) - only for placement officers
+    if request.method == 'POST':
+        if not is_placement_officer:
+            return redirect('login')  # redirect non-officers
+        
+        company_name = request.POST.get('company_name')
+        description = request.POST.get('description')
+        requirements = request.POST.get('requirements')  # JSON string
+        min_cgpa = float(request.POST.get('min_cgpa', 0))
+        min_skills_score = int(request.POST.get('min_skills_score', 0))
+        min_academics_score = int(request.POST.get('min_academics_score', 0))
+        salary = request.POST.get('salary')
+        positions = int(request.POST.get('positions_available', 1))
+        roles = request.POST.get('roles')
+        
+        if company_name:
+            Company.objects.update_or_create(
+                name=company_name,
+                defaults={
+                    'description': description,
+                    'requirements': requirements,
+                    'min_cgpa': min_cgpa,
+                    'min_skills_score': min_skills_score,
+                    'min_academics_score': min_academics_score,
+                    'salary': salary,
+                    'positions_available': positions,
+                    'roles': roles
+                }
+            )
+    
+    # Get all companies from DB
+    companies = Company.objects.all().order_by('-created_at')
+    
+    # Support search
+    query = request.GET.get('q')
+    if query:
+        companies = companies.filter(name__icontains=query)
+    
+    # Intelligent Student Shortlisting
+    shortlist_data = []
+    for company in companies:
+        requirements = company.get_requirements()
+        all_students = Student.objects.all()
+        
+        matched_students = []
+        for student in all_students:
+            # Check minimum requirements (but don't exclude if all are 0)
+            if company.min_cgpa > 0 and student.cgpa < company.min_cgpa:
+                continue
+            if company.min_skills_score > 0 and student.skills < company.min_skills_score:
+                continue
+            if company.min_academics_score > 0 and student.academics < company.min_academics_score:
+                continue
+            
+            # Calculate match score based on requirements
+            match_score = 0
+            max_score = 0
+            
+            # If no requirements specified, calculate based on all available scores
+            if not requirements or len(requirements) == 0:
+                # Default: match all students with percentage based on average scores
+                total_score = (student.skills + student.academics + student.practice + student.projects + student.aptitude)
+                match_percentage = total_score / 5 if total_score > 0 else 0
+            else:
+                # Match against specified requirements
+                if 'skills' in requirements:
+                    max_score += 100
+                    target_skills = int(requirements.get('skills', 0))
+                    match_score += min(100, (student.skills / target_skills * 100)) if target_skills > 0 else 100
+                
+                if 'academics' in requirements:
+                    max_score += 100
+                    target_academics = int(requirements.get('academics', 0))
+                    match_score += min(100, (student.academics / target_academics * 100)) if target_academics > 0 else 100
+                
+                if 'practice' in requirements:
+                    max_score += 100
+                    target_practice = int(requirements.get('practice', 0))
+                    match_score += min(100, (student.practice / target_practice * 100)) if target_practice > 0 else 100
+                
+                if 'projects' in requirements:
+                    max_score += 100
+                    target_projects = int(requirements.get('projects', 0))
+                    match_score += min(100, (student.projects / target_projects * 100)) if target_projects > 0 else 100
+                
+                if 'aptitude' in requirements:
+                    max_score += 100
+                    target_aptitude = int(requirements.get('aptitude', 0))
+                    match_score += min(100, (student.aptitude / target_aptitude * 100)) if target_aptitude > 0 else 100
+                
+                # Calculate final percentage match
+                if max_score > 0:
+                    match_percentage = (match_score / max_score) * 100
+                else:
+                    match_percentage = 0
+            
+            matched_students.append({
+                'student': student,
+                'match_percentage': round(match_percentage, 2),
+                'name': student.user.get_full_name() or student.user.username
+            })
+        
+        # Sort by match percentage (highest first) and take top candidates
+        matched_students.sort(key=lambda x: x['match_percentage'], reverse=True)
+        matched_students = matched_students[:company.positions_available * 3]  # Show 3x positions as options
+        
+        shortlist_data.append({
+            'company': company,
+            'matched_students': matched_students,
+            'match_count': len(matched_students)
+        })
+    
+    # Get legacy company data from placed students
+    placed_students = Student.objects.filter(placed=True).exclude(company__isnull=True).exclude(company='')
     companies_data = {}
     for student in placed_students:
         if student.company not in companies_data:
             companies_data[student.company] = []
         companies_data[student.company].append(student)
     
-    # Convert to list format for template
-    companies = [
+    legacy_companies = [
         {
             'name': company,
             'count': len(students),
@@ -419,18 +600,33 @@ def companies_list(request):
         for company, students in sorted(companies_data.items())
     ]
     
-    # Support search
-    query = request.GET.get('q')
-    if query:
-        companies = [c for c in companies if query.lower() in c['name'].lower()]
-    
     context = {
         'companies': companies,
-        'total_companies': len(companies),
-        'total_placements': placed_students.count()
+        'shortlist_data': shortlist_data,
+        'legacy_companies': legacy_companies,
+        'total_companies': companies.count() + len(legacy_companies),
+        'total_placements': placed_students.count(),
+        'is_placement_officer': is_placement_officer
     }
     
     return render(request, 'companies.html', context)
+
+@login_required
+def delete_company(request, company_id):
+    from .models import Company
+    
+    # Only placement officers can delete companies
+    if request.user.role != 'placement':
+        return redirect('login')
+    
+    try:
+        company = Company.objects.get(id=company_id)
+        company_name = company.name
+        company.delete()
+        # Redirect back to companies list with success message
+        return redirect('companies_list')
+    except Company.DoesNotExist:
+        return redirect('companies_list')
 
 def jobs_list(request):
     # Get all placed students with a job role
@@ -467,6 +663,8 @@ def jobs_list(request):
     return render(request, 'jobs.html', context)
 
 def reports_list(request):
+    from .models import Company
+    
     students = Student.objects.all()
     total_students = students.count()
     placed_students = students.filter(placed=True).count()
@@ -489,6 +687,7 @@ def reports_list(request):
             'name': branch,
             'total': data['total'],
             'placed': data['placed'],
+            'not_placed': data['total'] - data['placed'],
             'percentage': round((data['placed'] / data['total'] * 100) if data['total'] > 0 else 0, 2)
         }
         for branch, data in sorted(branches.items())
@@ -508,6 +707,7 @@ def reports_list(request):
             'year': year,
             'total': data['total'],
             'placed': data['placed'],
+            'not_placed': data['total'] - data['placed'],
             'percentage': round((data['placed'] / data['total'] * 100) if data['total'] > 0 else 0, 2)
         }
         for year, data in sorted(years.items())
@@ -515,6 +715,56 @@ def reports_list(request):
     
     # Average readiness score using unified system
     avg_readiness = calculate_average_readiness(students)
+    
+    # Company-wise placements
+    companies = Company.objects.all()
+    company_names = [c.name for c in companies]
+    company_positions = [c.positions_available for c in companies]
+    
+    # Company placement stats
+    company_placements = {}
+    placed_students_data = students.filter(placed=True)
+    for student in placed_students_data:
+        if student.company:
+            company_placements[student.company] = company_placements.get(student.company, 0) + 1
+    
+    placed_companies = list(company_placements.keys())[:10]  # Top 10
+    placed_counts = [company_placements.get(c, 0) for c in placed_companies]
+    
+    # Average scores analysis
+    avg_skills = round(students.aggregate(models.Avg('skills'))['skills__avg'] or 0, 2)
+    avg_academics = round(students.aggregate(models.Avg('academics'))['academics__avg'] or 0, 2)
+    avg_practice = round(students.aggregate(models.Avg('practice'))['practice__avg'] or 0, 2)
+    avg_projects = round(students.aggregate(models.Avg('projects'))['projects__avg'] or 0, 2)
+    avg_aptitude = round(students.aggregate(models.Avg('aptitude'))['aptitude__avg'] or 0, 2)
+    
+    # Readiness score distribution
+    readiness_ready = 0  # >= 75
+    readiness_moderate = 0  # >= 50, < 75
+    readiness_poor = 0  # < 50
+    
+    for student in students:
+        score = calculate_readiness_score(student)
+        if score >= 75:
+            readiness_ready += 1
+        elif score >= 50:
+            readiness_moderate += 1
+        else:
+            readiness_poor += 1
+    
+    # Top performing students
+    student_readiness = []
+    for student in students:
+        score = calculate_readiness_score(student)
+        student_readiness.append({
+            'name': student.user.get_full_name() or student.user.username,
+            'score': score,
+            'placed': student.placed,
+            'company': student.company or 'N/A',
+            'cgpa': student.cgpa
+        })
+    student_readiness.sort(key=lambda x: x['score'], reverse=True)
+    top_students = student_readiness[:5]
     
     context = {
         'total_students': total_students,
@@ -524,6 +774,103 @@ def reports_list(request):
         'branch_stats': branch_stats,
         'year_stats': year_stats,
         'avg_readiness': avg_readiness,
+        'company_names': company_names,
+        'company_positions': company_positions,
+        'placed_companies': placed_companies,
+        'placed_counts': placed_counts,
+        'avg_skills': avg_skills,
+        'avg_academics': avg_academics,
+        'avg_practice': avg_practice,
+        'avg_projects': avg_projects,
+        'avg_aptitude': avg_aptitude,
+        'readiness_ready': readiness_ready,
+        'readiness_moderate': readiness_moderate,
+        'readiness_poor': readiness_poor,
+        'top_students': top_students,
+        'companies_count': companies.count(),
     }
     
     return render(request, 'reports.html', context)
+
+
+# ML WEIGHT RETRAINING
+@login_required
+def ml_weight_analyzer(request):
+    """
+    ML-based weight analyzer - shows current weights and allows retraining
+    Only accessible to placement officers
+    """
+    if request.user.role != 'placement':
+        return redirect('login')
+    
+    from .ml_weight_optimizer import WeightOptimizer, retrain_weights
+    from django.core.cache import cache
+    
+    # Get current optimal weights or defaults
+    optimal_weights = cache.get('optimal_weights')
+    
+    if optimal_weights is None:
+        optimal_weights = {
+            'skills': 0.25,
+            'academics': 0.20,
+            'practice': 0.20,
+            'projects': 0.20,
+            'aptitude': 0.15
+        }
+    
+    # Create display dict with percentages
+    weights_display = {
+        key: {'value': round(val, 4), 'percentage': round(val * 100, 1)}
+        for key, val in optimal_weights.items()
+    }
+    
+    retraining_result = None
+    show_details = False
+    
+    if request.method == 'POST':
+        # Trigger ML retraining
+        retraining_result = retrain_weights()
+        show_details = True
+    
+    # Try to get saved insights
+    insights = cache.get('ml_insights')
+    
+    context = {
+        'current_weights': weights_display,
+        'retraining_result': retraining_result,
+        'insights': insights,
+        'show_details': show_details,
+    }
+    
+    return render(request, 'ml_weight_analyzer.html', context)
+
+
+@login_required
+def retrain_ml_weights(request):
+    """
+    API endpoint to retrain ML weights (POST only)
+    """
+    if request.user.role != 'placement':
+        return redirect('login')
+    
+    if request.method != 'POST':
+        return redirect('ml_weight_analyzer')
+    
+    from .ml_weight_optimizer import retrain_weights
+    from django.http import JsonResponse
+    from django.core.cache import cache
+    
+    try:
+        result = retrain_weights()
+        
+        if result['success']:
+            # Save insights to cache
+            cache.set('ml_insights', result['insights'], timeout=None)
+        
+        return JsonResponse(result)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error during retraining: {str(e)}'
+        }, status=500)

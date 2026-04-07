@@ -46,3 +46,37 @@ class Student(models.Model):
             return json.loads(self.applied_companies)
         except Exception:
             return [c.strip() for c in self.applied_companies.split(',') if c.strip()]
+
+
+class Company(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    requirements = models.TextField()  # JSON format: skill1:score, skill2:score, etc.
+    min_cgpa = models.FloatField(default=0.0)
+    min_skills_score = models.IntegerField(default=0)
+    min_academics_score = models.IntegerField(default=0)
+    salary = models.CharField(max_length=100, blank=True, null=True)
+    positions_available = models.IntegerField(default=1)
+    roles = models.TextField(blank=True, null=True)  # JSON format: role1, role2, etc.
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+    
+    def get_requirements(self):
+        """Parse requirements from JSON"""
+        if not self.requirements:
+            return {}
+        try:
+            return json.loads(self.requirements)
+        except:
+            return {}
+    
+    def get_roles(self):
+        """Get roles as list"""
+        if not self.roles:
+            return []
+        try:
+            return json.loads(self.roles)
+        except:
+            return [r.strip() for r in self.roles.split(',')]

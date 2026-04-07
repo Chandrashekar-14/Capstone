@@ -4,214 +4,668 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placement Reports</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Placement Analytics Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .stats-grid {
+        body {
+            background: url("{% static 'images/coplog.png' %}") !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            background-attachment: fixed !important;
+            min-height: 100vh !important;
+            font-family: Arial, sans-serif;
+            padding: 50px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85); /* optional overlay for readability */
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .main {
+            flex: 1;
+            flex-direction: column;
+            padding: 30px 20px;
+        }
+
+        .topbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 0 auto 20px auto;
+            max-width: 1400px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .topbar h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .metric-card.blue {
+            border-left-color: #667eea;
+        }
+
+        .metric-card.green {
+            border-left-color: #4CAF50;
+        }
+
+        .metric-card.red {
+            border-left-color: #f44336;
+        }
+
+        .metric-card.orange {
+            border-left-color: #ff9800;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .metric-subtext {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
+
+        .chart-card {
+            background: white;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        .stat-card.blue {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .stat-card.green {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-        }
-        .stat-card.red {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .stat-card.orange {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-        .stat-number {
-            font-size: 36px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .stat-label {
+
+        .chart-card h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
             font-size: 14px;
-            opacity: 0.9;
+            font-weight: bold;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
         }
+
         .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .table-card {
             background: white;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        .table-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow-x: auto;
+
+        .table-card h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         table th {
             background: #f5f5f5;
             padding: 12px;
             text-align: left;
             font-weight: bold;
-            border-bottom: 2px solid #ddd;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 12px;
         }
+
         table td {
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
         }
+
         table tr:hover {
             background: #f9f9f9;
         }
-        .progress-bar {
-            background: #e0e0e0;
-            border-radius: 10px;
-            height: 10px;
-            overflow: hidden;
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
         }
-        .progress-fill {
+
+        .status-placed {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .status-not-placed {
+            background: #ffccbc;
+            color: #d84315;
+        }
+
+        .readiness-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .readiness-high {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .readiness-medium {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        .readiness-low {
+            background: #ffccbc;
+            color: #d84315;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+            margin: 4px 0;
+        }
+
+        .progress-bar-fill {
             height: 100%;
-            background: #4CAF50;
-            border-radius: 10px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        .insights-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .insights-section h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+
+        .insight-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: 1;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Placement Reports</h1>
-        
-        <!-- Summary Stats -->
-        <div class="stats-grid">
-            <div class="stat-card blue">
-                <div class="stat-label">Total Students</div>
-                <div class="stat-number">{{ total_students }}</div>
+
+
+<!-- Main Content -->
+<div class="main">
+<div class="container">
+    <!-- Header -->
+    <div class="topbar">
+        <h1>📊 Placement Analytics Dashboard</h1>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card blue">
+                <div class="metric-label">Total Students</div>
+                <div class="metric-value">{{ total_students }}</div>
+                <div class="metric-subtext">Across all batches</div>
             </div>
-            <div class="stat-card green">
-                <div class="stat-label">Placed Students</div>
-                <div class="stat-number">{{ placed_students }}</div>
+            <div class="metric-card green">
+                <div class="metric-label">Placed Students</div>
+                <div class="metric-value">{{ placed_students }}</div>
+                <div class="metric-subtext"><strong>{{ placement_percentage }}%</strong> placement rate</div>
             </div>
-            <div class="stat-card red">
-                <div class="stat-label">Not Placed</div>
-                <div class="stat-number">{{ not_placed }}</div>
+            <div class="metric-card red">
+                <div class="metric-label">Not Placed</div>
+                <div class="metric-value">{{ not_placed }}</div>
+                <div class="metric-subtext">Seeking opportunities</div>
             </div>
-            <div class="stat-card orange">
-                <div class="stat-label">Placement Rate</div>
-                <div class="stat-number">{{ placement_percentage }}%</div>
+            <div class="metric-card orange">
+                <div class="metric-label">Avg Readiness</div>
+                <div class="metric-value">{{ avg_readiness|floatformat:1 }}%</div>
+                <div class="metric-subtext">Overall preparation</div>
+            </div>
+            <div class="metric-card blue">
+                <div class="metric-label">Active Companies</div>
+                <div class="metric-value">{{ companies_count }}</div>
+                <div class="metric-subtext">Recruiting</div>
+            </div>
+            <div class="metric-card green">
+                <div class="metric-label">Ready for Placement</div>
+                <div class="metric-value">{{ readiness_ready }}</div>
+                <div class="metric-subtext">Score ≥ 75%</div>
             </div>
         </div>
 
-        <!-- Placement Overview -->
-        <div class="chart-container">
-            <h3>Placement Overview</h3>
-            <canvas id="overviewChart" style="max-height: 300px;"></canvas>
-        </div>
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <!-- Placement Status Pie Chart -->
+            <div class="chart-card">
+                <h3>📈 Placement Status Overview</h3>
+                <div class="chart-container">
+                    <canvas id="placementStatusChart"></canvas>
+                </div>
+            </div>
 
-        <!-- Average Readiness -->
-        <div class="chart-container">
-            <h3>Average Readiness Score: {{ avg_readiness }}/100</h3>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {{ avg_readiness }}%;"></div>
+            <!-- Readiness Distribution -->
+            <div class="chart-card">
+                <h3>🎯 Readiness Score Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="readinessDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Average Scores -->
+            <div class="chart-card">
+                <h3>📊 Average Student Scores</h3>
+                <div class="chart-container">
+                    <canvas id="averageScoresChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Branch-wise Placement -->
+            <div class="chart-card">
+                <h3>🏢 Placement by Branch</h3>
+                <div class="chart-container">
+                    <canvas id="branchPlacementChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Year-wise Placement -->
+            <div class="chart-card">
+                <h3>📅 Placement by Year</h3>
+                <div class="chart-container">
+                    <canvas id="yearPlacementChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Companies -->
+            <div class="chart-card">
+                <h3>🏆 Top Recruiting Companies</h3>
+                <div class="chart-container">
+                    <canvas id="topCompaniesChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <!-- Branch-wise Statistics -->
-        <div class="table-container">
-            <h3>Branch-wise Placement Statistics</h3>
+        <!-- Top Performers Table -->
+        <div class="table-card">
+            <h3>⭐ Top 5 Students by Readiness Score</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Readiness Score</th>
+                        <th>CGPA</th>
+                        <th>Placement Status</th>
+                        <th>Company</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in top_students %}
+                        <tr>
+                            <td><strong>{{ student.name }}</strong></td>
+                            <td>
+                                {% if student.score >= 75 %}
+                                    <span class="readiness-badge readiness-high">{{ student.score|floatformat:1 }}%</span>
+                                {% elif student.score >= 50 %}
+                                    <span class="readiness-badge readiness-medium">{{ student.score|floatformat:1 }}%</span>
+                                {% else %}
+                                    <span class="readiness-badge readiness-low">{{ student.score|floatformat:1 }}%</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ student.cgpa }}</td>
+                            <td>
+                                {% if student.placed %}
+                                    <span class="status-badge status-placed">✓ Placed</span>
+                                {% else %}
+                                    <span class="status-badge status-not-placed">✗ Not Placed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ student.company }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Branch Statistics Table -->
+        <div class="table-card">
+            <h3>📋 Placement Statistics by Branch</h3>
             <table>
                 <thead>
                     <tr>
                         <th>Branch</th>
                         <th>Total Students</th>
                         <th>Placed</th>
+                        <th>Not Placed</th>
                         <th>Placement %</th>
                         <th>Progress</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for stat in branch_stats %}
-                    <tr>
-                        <td><strong>{{ stat.name }}</strong></td>
-                        <td>{{ stat.total }}</td>
-                        <td>{{ stat.placed }}</td>
-                        <td>{{ stat.percentage }}%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ stat.percentage }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
+                    {% for branch in branch_stats %}
+                        <tr>
+                            <td><strong>{{ branch.name }}</strong></td>
+                            <td>{{ branch.total }}</td>
+                            <td style="color: #4CAF50; font-weight: bold;">{{ branch.placed }}</td>
+                            <td style="color: #f44336; font-weight: bold;">{{ branch.not_placed }}</td>
+                            <td><strong>{{ branch.percentage }}%</strong></td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: {{ branch.percentage }}%"></div>
+                                </div>
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <!-- Year-wise Statistics -->
-        <div class="table-container">
-            <h3>Year-wise Placement Statistics</h3>
+        <!-- Year Statistics Table -->
+        <div class="table-card">
+            <h3>📅 Placement Statistics by Academic Year</h3>
             <table>
                 <thead>
                     <tr>
                         <th>Year</th>
                         <th>Total Students</th>
                         <th>Placed</th>
+                        <th>Not Placed</th>
                         <th>Placement %</th>
                         <th>Progress</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for stat in year_stats %}
-                    <tr>
-                        <td><strong>Year {{ stat.year }}</strong></td>
-                        <td>{{ stat.total }}</td>
-                        <td>{{ stat.placed }}</td>
-                        <td>{{ stat.percentage }}%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ stat.percentage }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
+                    {% for year in year_stats %}
+                        <tr>
+                            <td><strong>Year {{ year.year }}</strong></td>
+                            <td>{{ year.total }}</td>
+                            <td style="color: #4CAF50; font-weight: bold;">{{ year.placed }}</td>
+                            <td style="color: #f44336; font-weight: bold;">{{ year.not_placed }}</td>
+                            <td><strong>{{ year.percentage }}%</strong></td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: {{ year.percentage }}%"></div>
+                                </div>
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
 
-    <script>
-        const ctx = document.getElementById('overviewChart');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Placed', 'Not Placed'],
-                datasets: [{
-                    data: [{{ placed_students }}, {{ not_placed }}],
-                    backgroundColor: ['#4CAF50', '#F44336'],
-                    borderColor: ['#45a049', '#da190b'],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
-                    }
+        <!-- Key Insights -->
+        <div class="insights-section">
+            <h3>💡 Key Insights & Summary</h3>
+            <div class="insight-item">
+                ✓ Overall placement rate: <strong>{{ placement_percentage }}%</strong> - {{ placed_students }} out of {{ total_students }} students placed
+            </div>
+            <div class="insight-item">
+                ✓ Average student readiness score: <strong>{{ avg_readiness|floatformat:1 }}%</strong>
+            </div>
+            <div class="insight-item">
+                ✓ Students ready for placement (≥75%): <strong>{{ readiness_ready }}</strong> | Moderate (50-75%): <strong>{{ readiness_moderate }}</strong> | Needs improvement: <strong>{{ readiness_poor }}</strong>
+            </div>
+            <div class="insight-item">
+                ✓ Average Scores - Skills: <strong>{{ avg_skills }}</strong>/100 | Academics: <strong>{{ avg_academics }}</strong>/100 | Practice: <strong>{{ avg_practice }}</strong>/100 | Projects: <strong>{{ avg_projects }}</strong>/100 | Aptitude: <strong>{{ avg_aptitude }}</strong>/100
+            </div>
+            <div class="insight-item">
+                ✓ Active recruiting companies: <strong>{{ companies_count }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    // Placement Status Pie Chart
+    const placementCtx = document.getElementById('placementStatusChart').getContext('2d');
+    new Chart(placementCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Placed', 'Not Placed'],
+            datasets: [{
+                data: [{{ placed_students }}, {{ not_placed }}],
+                backgroundColor: ['#4CAF50', '#f44336'],
+                borderColor: ['#45a049', '#da190b'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 15, font: { size: 12 } }
                 }
             }
-        });
-    </script>
+        }
+    });
+
+    // Readiness Distribution
+    const readinessCtx = document.getElementById('readinessDistributionChart').getContext('2d');
+    new Chart(readinessCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Ready (≥75%)', 'Moderate (50-75%)', 'Needs Improvement'],
+            datasets: [{
+                label: 'Number of Students',
+                data: [{{ readiness_ready }}, {{ readiness_moderate }}, {{ readiness_poor }}],
+                backgroundColor: ['#4CAF50', '#ff9800', '#f44336'],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'bottom' }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Average Scores
+    const scoresCtx = document.getElementById('averageScoresChart').getContext('2d');
+    new Chart(scoresCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Skills', 'Academics', 'Practice', 'Projects', 'Aptitude'],
+            datasets: [{
+                label: 'Average Scores',
+                data: [{{ avg_skills }}, {{ avg_academics }}, {{ avg_practice }}, {{ avg_projects }}, {{ avg_aptitude }}],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                pointBackgroundColor: '#667eea',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            },
+            scales: {
+                r: { max: 100, beginAtZero: true }
+            }
+        }
+    });
+
+    // Branch Placement
+    const branchCtx = document.getElementById('branchPlacementChart').getContext('2d');
+    new Chart(branchCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for branch in branch_stats %}'{{ branch.name }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [
+                {
+                    label: 'Placed',
+                    data: [{% for branch in branch_stats %}{{ branch.placed }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: '#4CAF50'
+                },
+                {
+                    label: 'Not Placed',
+                    data: [{% for branch in branch_stats %}{{ branch.total|add:"-"|add:branch.placed }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: '#f44336'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Year Placement
+    const yearCtx = document.getElementById('yearPlacementChart').getContext('2d');
+    new Chart(yearCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for year in year_stats %}'Year {{ year.year }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Students Placed',
+                data: [{% for year in year_stats %}{{ year.placed }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#667eea'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Top Companies
+    const companiesCtx = document.getElementById('topCompaniesChart').getContext('2d');
+    new Chart(companiesCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for company in placed_companies %}'{{ company }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Students Placed',
+                data: [{% for count in placed_counts %}{{ count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                backgroundColor: '#667eea',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+
 </body>
 </html>

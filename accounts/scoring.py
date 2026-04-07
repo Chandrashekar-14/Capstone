@@ -2,10 +2,16 @@
 """
 Unified Readiness Score Calculation System
 Addresses: inconsistent scoring, hardcoded weights, no role-specific customization
+
+Now supports:
+- Dynamic weights learned from real placement data (via ML)
+- Role-specific weights for targeted preparation
+- Fallback to default weights if no ML training done
 """
 
 from typing import Dict, Optional
 from .models import Student
+from django.core.cache import cache
 
 # Default weights for general readiness score
 DEFAULT_WEIGHTS = {
@@ -66,8 +72,15 @@ def calculate_readiness_score(student: Student, target_role: Optional[str] = Non
     Returns:
         float: Readiness score (0-100)
     """
-    # Get appropriate weights
-    weights = ROLE_WEIGHTS.get(target_role, DEFAULT_WEIGHTS)
+    # Try to get ML-optimized weights first
+    optimal_weights = cache.get('optimal_weights')
+    
+    if optimal_weights and not target_role:
+        # Use AI-learned weights if no specific role target
+        weights = optimal_weights
+    else:
+        # Get appropriate weights
+        weights = ROLE_WEIGHTS.get(target_role, DEFAULT_WEIGHTS)
 
     # Calculate weighted score
     score = (

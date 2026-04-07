@@ -80,10 +80,53 @@
 
     <!-- Announcement Section -->
     <div class="table-section">
-        <h2 style="text-align:center;">ANNOUNCEMENTS</h2>
-        <div style="margin-top: 20px;">
-            <p>📢 New company visiting next week</p>
-            <p>📢 Resume submission deadline: Friday</p>
+        <h2 style="text-align:center;">📢 ANNOUNCEMENTS & COMPANY UPDATES</h2>
+        <div style="margin-top: 20px; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 10px;">
+            <!-- Default Announcements -->
+            <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+                <h3 style="margin: 0 0 10px 0; color: #667eea;">🔔 General Announcements</h3>
+                <div style="color: #555; font-size: 14px; line-height: 1.8;">
+                    <p>📢 New companies visiting this week - Check details below</p>
+                    <p>📢 Resume submission deadline: Friday 5:00 PM</p>
+                    <p>📢 Skill Gap Training: Python Advanced Course - Register Now</p>
+                </div>
+            </div>
+
+            <!-- Companies Section -->
+            <div>
+                <h3 style="margin: 0 0 15px 0; color: #667eea;">🏢 Active Recruiting Companies</h3>
+                {% if companies %}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                        {% for company in companies %}
+                            <div style="background: #f8f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; transition: 0.3s;">
+                                <h4 style="margin: 0 0 8px 0; color: #333; font-size: 14px;">{{ company.name }}</h4>
+                                <p style="margin: 5px 0; font-size: 12px; color: #666;">
+                                    <strong>Min CGPA:</strong> {{ company.min_cgpa }}
+                                </p>
+                                {% if company.salary %}
+                                <p style="margin: 5px 0; font-size: 12px; color: #666;">
+                                    <strong>Salary:</strong> {{ company.salary }}
+                                </p>
+                                {% endif %}
+                                {% if company.positions_available %}
+                                <p style="margin: 5px 0; font-size: 12px; color: #667eea; font-weight: bold;">
+                                    🎯 {{ company.positions_available }} Position(s) Available
+                                </p>
+                                {% endif %}
+                                {% if company.roles %}
+                                <p style="margin: 8px 0 0 0; font-size: 11px;">
+                                    <strong>Roles:</strong> {{ company.get_roles|join:", " }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; color: #856404; font-size: 13px;">
+                        ℹ️ No companies are recruiting right now. Check back soon!
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 

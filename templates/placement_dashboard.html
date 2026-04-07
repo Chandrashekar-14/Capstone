@@ -1,34 +1,94 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Placement Dashboard</title>
 
-    <link rel="stylesheet" href="{% static 'css/placement_dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            background-image: url("{% static 'images/coplog.png' %}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            margin: 0;
+        .progress-container {
+            width: 80%;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin: 10px auto;
+            height: 25px;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 15px;
+        .progress-bar {
+            height: 25px;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+            line-height: 25px;
+            font-weight: bold;
+        }
+        .prediction-section {
+            margin: 30px auto;
+            width: 80%;
             padding: 20px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
         }
-
-        .sidebar, .content, .card, .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            border-radius: 12px;
+        .prediction-section h2 {
+            margin-bottom: 15px;
+        }
+        .prediction-status {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .upload-section {
+            margin: 20px auto;
+            width: 80%;
+            padding: 20px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+        }
+        .upload-section h3 {
+            margin-top: 0;
+        }
+        .upload-section form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .upload-section input[type="file"] {
+            flex: 1;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+        }
+        .upload-section button {
+            padding: 8px 20px;
+            background: linear-gradient(45deg, #ff6b6b, #f06595);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .upload-section button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        canvas {
+            max-height: 300px;
+        }
+        .alert-box {
+            margin: 20px auto;
+            width: 80%;
+            padding: 20px;
+            background-color: rgba(244,67,54,0.2);
+            border-left: 5px solid #F44336;
+            border-radius: 5px;
             color: white;
         }
     </style>
@@ -36,70 +96,66 @@
 
 <body>
 
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>📊 Placement</h2>
+    <ul>
+        <li><a href="{% url 'placement_dashboard' %}" class="{% if request.path == '/placement/' %}active{% endif %}">Dashboard</a></li>
+        <li><a href="{% url 'student_list' %}" class="{% if request.path == '/students/' %}active{% endif %}">Students</a></li>
+        <li><a href="{% url 'companies_list' %}" class="{% if request.path == '/companies/' %}active{% endif %}">Companies</a></li>
+        <li><a href="{% url 'reports_list' %}" class="{% if request.path == '/reports/' %}active{% endif %}">Reports</a></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+    </ul>
+</div>
+
+<!-- Main Content -->
 <div class="main">
 
-    <!-- 🔷 SIDEBAR -->
-    <div class="sidebar">
-        <h2>Placement</h2>
-        <a href="{% url 'placement_dashboard' %}"
-        class="{% if request.path == '/placement/' %}active{% endif %}">Dashboard</a>
-        <a href="{% url 'student_list' %}" 
-        class="{% if request.path == '/students/' %}active{% endif %}">Students</a>
-        <a href="{% url 'companies_list' %}"
-        class="{% if request.path == '/companies/' %}active{% endif %}">Companies</a>
-        <a href="{% url 'jobs_list' %}"
-        class="{% if request.path == '/jobs/' %}active{% endif %}">Jobs</a>
-        <a href="{% url 'reports_list' %}"
-        class="{% if request.path == '/reports/' %}active{% endif %}">Reports</a>
-        <a href="{% url 'logout' %}" >Logout</a>
+    <!-- Header -->
+    <div class="topbar">
+        <h1>SMART COLLEGE ANALYTICS SYSTEM (PLACEMENT PANEL)</h1>
     </div>
 
-    <!-- 🔷 CONTENT -->
-    <div class="content">
-
-        <h1>Dashboard</h1>
-
-        <!-- SUMMARY -->
-        <div class="cards">
-            <div class="card">
-                <p>Total Students</p>
-                <h2>{{ total_students }}</h2>
-            </div>
-
-            <div class="card">
-                <p>Avg Readiness</p>
-                <h2>{{ avg_readiness }}</h2>
-            </div>
-
-            <div class="card">
-                <p>Companies</p>
-                <h2>{{ total_companies }}</h2>
-            </div>
+    <!-- Summary Cards -->
+    <div class="cards">
+        <div class="card">
+            <p>Total Students</p>
+            <h3>{{ total_students }}</h3>
         </div>
-
-        <!-- CHART -->
-        <div class="glass">
-            <h3>Readiness Distribution</h3>
-            <canvas id="myChart"></canvas>
+        <div class="card">
+            <p>Avg Readiness</p>
+            <h3>{{ avg_readiness }}%</h3>
         </div>
-
-        <!-- ALERT -->
-        <div class="glass alert">
-            <h3>Low Readiness Alert</h3>
-            <p>{{ low }} students need attention</p>
+        <div class="card">
+            <p>Companies</p>
+            <h3>{{ total_companies }}</h3>
         </div>
-
-        <!-- UPLOAD -->
-        <div class="glass">
-            <h3>Upload Placement Data</h3>
-
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="file" name="file">
-                <button type="submit">Upload</button>
-            </form>
+        <div class="card">
+            <p>Placed Students</p>
+            <h3>{{ placed_count }}</h3>
         </div>
+    </div>
 
+    <!-- Readiness Distribution Chart -->
+    <div class="prediction-section">
+        <h2>Readiness Distribution</h2>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- Low Readiness Alert -->
+    <div class="alert-box">
+        <h3>⚠️ Low Readiness Alert</h3>
+        <p>{{ low }} students need attention</p>
+    </div>
+
+    <!-- CSV Upload Section -->
+    <div class="upload-section">
+        <h3>📤 Upload Placement Data</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit">Upload CSV</button>
+        </form>
     </div>
 
 </div>
@@ -110,26 +166,39 @@
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['High', 'Moderate', 'Low'],
+            labels: ['High (80+)', 'Moderate (50-80)', 'Low (<50)'],
             datasets: [{
                 label: 'Students',
                 data: [{{ high }}, {{ moderate }}, {{ low }}],
                 backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],
                 borderColor: ['#45a049', '#FFB300', '#da190b'],
-                borderWidth: 1
+                borderWidth: 2,
+                borderRadius: 8
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: true,
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        font: { size: 14, weight: 'bold' }
+                    }
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        font: { size: 12 }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: { size: 12 }
+                    }
                 }
             }
         }

@@ -21,6 +21,9 @@ urlpatterns = [
     path('placement/', views.placement_dashboard, name='placement_dashboard'),
     path('students/', views.student_list, name='student_list'),
     path('companies/', views.companies_list, name='companies_list'),
+    path('companies/delete/<int:company_id>/', views.delete_company, name='delete_company'),
     path('jobs/', views.jobs_list, name='jobs_list'),
     path('reports/', views.reports_list, name='reports_list'),
+    path('ml-weight-analyzer/', views.ml_weight_analyzer, name='ml_weight_analyzer'),
+    path('retrain-ml-weights/', views.retrain_ml_weights, name='retrain_ml_weights'),
 ]
