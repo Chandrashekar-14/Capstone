@@ -1,0 +1,100 @@
+/* Body & Background */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+
+    background-image: url("/static/images/coplog.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: white;
+}
+
+/* Main container with overlay */
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    background: rgba(17, 24, 39, 0.85); /* semi-transparent for readability */
+    border-radius: 12px;
+}
+
+/* Page Heading */
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Sections styling */
+.section {
+    background: rgba(17, 24, 39, 0.9);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* Lists */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    margin: 8px 0;
+}
+
+/* Back Button */
+.back-btn {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #2563eb;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+/* Form */
+form {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(17,24,39,0.9);
+    border-radius: 10px;
+}
+
+select, button {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: none;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+/* Chart container */
+canvas {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+}

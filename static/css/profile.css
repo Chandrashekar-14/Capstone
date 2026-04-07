@@ -2,8 +2,34 @@
 body.profile-page-bg {
     background-image: url('/static/images/coplog.png');
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     font-family: Arial, sans-serif;
     padding: 50px 20px;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Edit Profile Button: bottom-left fixed */
+#edit-profile-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 12px 25px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    z-index: 1000;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+#edit-profile-btn:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
 }
 
 /* Profile page layout */
@@ -23,7 +49,7 @@ body.profile-page-bg {
 }
 
 /* Individual containers */
-.profile-container {
+.profile-container, .readiness-container {
     background: rgba(0,0,0,0.7);
     backdrop-filter: blur(15px);
     border-radius: 20px;
@@ -45,10 +71,18 @@ body.profile-page-bg {
 /* Achievements: full width */
 .achievements-container {
     width: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    color: white;
 }
 
 /* Headings */
-.profile-container h2 {
+.profile-container h2,
+.readiness-container h2,
+.achievements-container h2 {
     margin-bottom: 15px;
     font-size: 22px;
     border-bottom: 1px solid rgba(255,255,255,0.3);
@@ -67,9 +101,13 @@ body.profile-page-bg {
 
 .readiness-container .progress-bar .progress {
     height: 100%;
-    background: linear-gradient(90deg, #ff6b6b, #f06595);
+    background: linear-gradient(90deg, #27ae60, #2ecc71);
     border-radius: 25px;
     transition: width 1s ease;
+    text-align: center;
+    color: white;
+    line-height: 25px;
+    font-weight: bold;
 }
 
 /* Achievements list */
@@ -82,4 +120,16 @@ body.profile-page-bg {
     text-align: left;
     margin: 8px 0;
     font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .top-row {
+        flex-direction: column;
+    }
+    #edit-profile-btn {
+        bottom: 15px;
+        left: 15px;
+        padding: 10px 20px;
+    }
 }

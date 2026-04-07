@@ -19,15 +19,30 @@
             <p><strong>Branch:</strong> {{ student.branch }}</p>
             <p><strong>Year:</strong> {{ student.year }}</p>
             <p><strong>CGPA:</strong> {{ student.cgpa }}</p>
+            <p><strong>Skills:</strong> {{ student.skills }}</p>
+            <p><strong>Academics:</strong> {{ student.academics }}</p>
+            <p><strong>Practice:</strong> {{ student.practice }}</p>
+            <p><strong>Projects:</strong> {{ student.projects }}</p>
+            <p><strong>Aptitude:</strong> {{ student.aptitude }}</p>
         </div>
 
         <!-- Right: Placement Readiness -->
         <div class="profile-container readiness-container">
             <h2>📊 Placement Readiness</h2>
             <div class="progress-bar">
-                <div class="progress" style="width: {{ student.readiness_score }}%;"></div>
+                <div class="progress" style="width: {{ student.readiness_score }}%;">
+                    {{ student.readiness_score }}%
+                </div>
             </div>
-            <p>{{ student.readiness_score }}%</p>
+            <p>Status: 
+                {% if student.readiness_score > 75 %}
+                    Placement Ready ✅
+                {% elif student.readiness_score > 50 %}
+                    Moderate ⚠️
+                {% else %}
+                    Needs Improvement ❌
+                {% endif %}
+            </p>
         </div>
     </div>
 
@@ -37,11 +52,41 @@
         <ul>
             {% for achievement in student.achievements %}
             <li>✔ {{ achievement }}</li>
+            {% empty %}
+            <li>No achievements listed yet.</li>
             {% endfor %}
         </ul>
     </div>
 
+    <!-- Edit Profile Button below Achievements -->
+    <div style="margin-top: 20px; text-align: left;">
+        <a href="{% url 'edit_profile' %}">
+            <button style="
+                padding: 12px 25px; 
+                background-color: #3498db; 
+                color: white; 
+                border: none; 
+                border-radius: 8px; 
+                cursor: pointer; 
+                font-weight: bold; 
+                box-shadow: 0 3px 6px rgba(0,0,0,0.3); 
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: 0.3s;
+            "
+            onmouseover="this.style.backgroundColor='#2980b9';"
+            onmouseout="this.style.backgroundColor='#3498db';">
+                ✏️ Edit Profile
+            </button>
+        </a>
+    </div>
+
+    <div style="margin: 20px 0;">
+    <a href="{% url 'student_dashboard' %}" class="btn btn-primary">⬅ Back</a>
 </div>
+
+</div> <!-- End of profile-page -->
 
 </body>
 </html>

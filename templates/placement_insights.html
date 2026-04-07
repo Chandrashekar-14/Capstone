@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Placement Insights</title>
+    <link rel="stylesheet" href="{% static 'css/placement_insights.css' %}">
+        <!-- Inline CSS for background image -->
+    <style>
+        body {
+            background-image: url("{% static 'images/coplog.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            padding: 50px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85); /* optional overlay for readability */
+            border-radius: 15px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>📈 Placement Insights</h1>
+
+    {% if student_insight %}
+    <div class="student-insight-box">
+        <h2>{{ student_insight.name }}'s Placement Insight</h2>
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Applications Submitted</h3>
+                <p>{{ student_insight.applications }}</p>
+            </div>
+            <div class="card">
+                <h3>Offer Letters Received</h3>
+                <p>{{ student_insight.offers }}</p>
+            </div>
+            <div class="card">
+                <h3>Success Rate</h3>
+                <p>{{ student_insight.success_rate }}%</p>
+            </div>
+            <div class="card">
+                <h3>Placement Status</h3>
+                <p>{{ student_insight.status }}</p>
+            </div>
+            <div class="card">
+                <h3>Applied Companies</h3>
+                <p>{% if student_insight.applied_companies %}{{ student_insight.applied_companies|join:", " }}{% else %}N/A{% endif %}</p>
+            </div>
+            <div class="card">
+                <h3>Placed Company</h3>
+                <p>{{ student_insight.placed_company }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Summary Cards -->
+    <div class="summary-section">
+        <h2 class="section-title">Overall Placement Summary</h2>
+        <div class="summary-cards">
+            <div class="card">
+                    <h3>Total Students</h3>
+                    <p>{{ total_students }}</p>
+            </div>
+                <div class="card">
+                    <h3>Students Placed</h3>
+                    <p>{{ students_placed }}</p>
+            </div>
+                <div class="card">
+                    <h3>Students Not Placed</h3>
+                    <p>{{ students_not_placed }}</p>
+                </div>
+            <div class="card">
+                    <h3>Average Readiness Score</h3>
+                    <p>{{ avg_readiness }}%</p>
+                </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts">
+        <div class="chart-container">
+            <h2>Company-wise Placements</h2>
+            <canvas id="companyChart" width="400" height="300"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>Readiness Score Distribution</h2>
+            <canvas id="readinessChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Placements Table -->
+    <div class="table-container">
+        <h2>Recent Placements</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Branch</th>
+                    <th>CGPA</th>
+                    <th>Company</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for placement in recent_placements %}
+                <tr>
+                    <td>{{ placement.user.get_full_name|default:placement.user.username }}</td>
+                    <td>{{ placement.branch }}</td>
+                    <td>{{ placement.cgpa }}</td>
+                    <td>{{ placement.company }}</td>
+                    <td>{{ placement.role }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin: 20px 0;">
+    <a href="{% url 'student_dashboard' %}" class="btn btn-primary">⬅ Back</a>
+</div>
+
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Company Chart
+    const ctx1 = document.getElementById('companyChart').getContext('2d');
+    const companyChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: {{ company_labels|safe }},
+            datasets: [{
+                label: 'Students Placed',
+                data: {{ company_counts|safe }},
+                backgroundColor: '#3498db'
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Readiness Score Distribution
+    const ctx2 = document.getElementById('readinessChart').getContext('2d');
+    const readinessChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: {{ readiness_labels|safe }},
+            datasets: [{
+                label: 'Number of Students',
+                data: {{ readiness_counts|safe }},
+                backgroundColor: '#27ae60'
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+</script>
+
+</body>
+</html>

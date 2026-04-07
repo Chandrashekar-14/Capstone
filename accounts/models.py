@@ -20,7 +20,12 @@ class Student(models.Model):
     practice = models.IntegerField(default=0)
     projects = models.IntegerField(default=0)
     aptitude = models.IntegerField(default=0)
-    achievements = models.TextField(blank=True, null=True)  # store as comma-separated
+    achievements = models.TextField(blank=True, null=True) 
+    placed = models.BooleanField(default=False) 
+    
+    company = models.CharField(max_length=100, blank=True, null=True)
+    applied_companies = models.TextField(blank=True, null=True)
+    role = models.CharField(max_length=100, blank=True, null=True)  # store as comma-separated
 
     def __str__(self):
         return self.user.username
@@ -33,3 +38,11 @@ class Student(models.Model):
             return json.loads(self.achievements)
         except:
             return [a.strip() for a in self.achievements.split(',')]
+
+    def get_applied_companies(self):
+        if not self.applied_companies:
+            return []
+        try:
+            return json.loads(self.applied_companies)
+        except Exception:
+            return [c.strip() for c in self.applied_companies.split(',') if c.strip()]

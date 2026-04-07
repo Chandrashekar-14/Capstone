@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Placement Dashboard</title>
+
+    <link rel="stylesheet" href="{% static 'css/placement_dashboard.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-image: url("{% static 'images/coplog.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .sidebar, .content, .card, .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="main">
+
+    <!-- 🔷 SIDEBAR -->
+    <div class="sidebar">
+        <h2>Placement</h2>
+        <a href="{% url 'placement_dashboard' %}"
+        class="{% if request.path == '/placement/' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'student_list' %}" 
+        class="{% if request.path == '/students/' %}active{% endif %}">Students</a>
+        <a href="{% url 'companies_list' %}"
+        class="{% if request.path == '/companies/' %}active{% endif %}">Companies</a>
+        <a href="{% url 'jobs_list' %}"
+        class="{% if request.path == '/jobs/' %}active{% endif %}">Jobs</a>
+        <a href="{% url 'reports_list' %}"
+        class="{% if request.path == '/reports/' %}active{% endif %}">Reports</a>
+        <a href="{% url 'logout' %}" >Logout</a>
+    </div>
+
+    <!-- 🔷 CONTENT -->
+    <div class="content">
+
+        <h1>Dashboard</h1>
+
+        <!-- SUMMARY -->
+        <div class="cards">
+            <div class="card">
+                <p>Total Students</p>
+                <h2>{{ total_students }}</h2>
+            </div>
+
+            <div class="card">
+                <p>Avg Readiness</p>
+                <h2>{{ avg_readiness }}</h2>
+            </div>
+
+            <div class="card">
+                <p>Companies</p>
+                <h2>{{ total_companies }}</h2>
+            </div>
+        </div>
+
+        <!-- CHART -->
+        <div class="glass">
+            <h3>Readiness Distribution</h3>
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <!-- ALERT -->
+        <div class="glass alert">
+            <h3>Low Readiness Alert</h3>
+            <p>{{ low }} students need attention</p>
+        </div>
+
+        <!-- UPLOAD -->
+        <div class="glass">
+            <h3>Upload Placement Data</h3>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="file">
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['High', 'Moderate', 'Low'],
+            datasets: [{
+                label: 'Students',
+                data: [{{ high }}, {{ moderate }}, {{ low }}],
+                backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],
+                borderColor: ['#45a049', '#FFB300', '#da190b'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

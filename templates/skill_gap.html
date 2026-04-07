@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Skill Gap Analyzer</title>
+    <link rel="stylesheet" href="{% static 'css/skill_gap.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+body {
+    background-image: url("{% static 'images/coplog.png' %}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: Arial, sans-serif;
+    color: white;
+    margin: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧠 AI Skill Gap Analyzer</h1>
+
+    <!-- Student Info -->
+    <div class="section">
+        <h2>Student Details</h2>
+        <p><strong>Branch:</strong> {{ branch }}</p>
+        
+        <!-- Role Selection Form -->
+        <form method="post" style="margin-top: 15px;">
+            {% csrf_token %}
+            <label for="target_role" style="display: block; margin-bottom: 5px;"><strong>Select Target Role:</strong></label>
+            <select name="target_role" id="target_role" onchange="this.form.submit()" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                <option value="Software Engineer" {% if target_role == "Software Engineer" %}selected{% endif %}>Software Engineer</option>
+                <option value="Data Scientist" {% if target_role == "Data Scientist" %}selected{% endif %}>Data Scientist</option>
+                <option value="Web Developer" {% if target_role == "Web Developer" %}selected{% endif %}>Web Developer</option>
+                <option value="AI Engineer" {% if target_role == "AI Engineer" %}selected{% endif %}>AI Engineer</option>
+                <option value="System Administrator" {% if target_role == "System Administrator" %}selected{% endif %}>System Administrator</option>
+            </select>
+        </form>
+        
+        <p><strong>Current Target Role:</strong> {{ target_role }}</p>
+    </div>
+
+    <!-- ML Prediction -->
+    <div class="section">
+        <h2>🎯 Placement Prediction</h2>
+        
+        <p><strong>Probability:</strong> {{ probability }}%</p>
+    </div>
+
+    <!-- Current Skills -->
+    <div class="section">
+        <h2>📊 Current Skills</h2>
+        <ul>
+            {% for skill, value in current_skills.items %}
+                <li>{{ skill }} : {{ value }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Radar Chart -->
+    <div class="section">
+        <h2>📈 Skill Visualization</h2>
+        <canvas id="radarChart"></canvas>
+    </div>
+
+    <!-- Feature Importance -->
+    <div class="section">
+        <h2>📊 Feature Importance (ML Insight)</h2>
+        <ul>
+            {% for key, value in importance.items %}
+                <li>{{ key }} : {{ value|floatformat:2 }}</li>
+            {% empty %}
+                <li>No data available</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Year-wise Strategy -->
+    <div class="section">
+        <h2>📅 Year-wise Strategy</h2>
+        <ul>
+            {% for year, plan in year_stats.items %}
+                <li><strong>Year {{ year }}:</strong> {{ plan }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-btn">
+        <a href="{% url 'student_dashboard' %}" class="btn">⬅ Back</a>
+    </div>
+</div>
+
+<!-- Radar Chart Script -->
+<script>
+const data = {
+    labels: ["Skills","Academics","Practice","Projects","Aptitude"],
+    datasets: [{
+        label: "Your Performance",
+        data: [
+            {{ student.skills }},
+            {{ student.academics }},
+            {{ student.practice }},
+            {{ student.projects }},
+            {{ student.aptitude }}
+        ],
+        fill: true,
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        pointBackgroundColor: "rgba(54, 162, 235, 1)"
+    }]
+};
+
+new Chart(document.getElementById("radarChart"), {
+    type: "radar",
+    data: data,
+    options: {
+        responsive: true,
+        scales: {
+            r: {
+                beginAtZero: true,
+                suggestedMax: 15
+            }
+        }
+    }
+});
+</script>
+
+</body>
+</html>

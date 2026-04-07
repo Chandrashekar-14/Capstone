@@ -104,3 +104,47 @@ th, td {
 .status.selected {
     color: lightgreen;
 }
+
+.back-button {
+    display: inline-block;
+    padding: 10px 18px;
+    background-color: #007bff; /* blue button */
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 20px 0;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.back-button:hover {
+    background-color: #0056b3; /* darker blue on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 5px 8px rgba(0,0,0,0.15);
+}
+
+.chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.progress-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 30px;
+    margin: 10px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    line-height: 30px; /* centers text vertically */
+    transition: width 0.5s ease;
+}

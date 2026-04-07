@@ -1,7 +1,7 @@
-# accounts/admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User, Student
+
 
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -12,7 +12,9 @@ class CustomUserAdmin(UserAdmin):
         ('Role Info', {'fields': ('role',)}),
     )
 
+
 admin.site.register(User, CustomUserAdmin)
+
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):

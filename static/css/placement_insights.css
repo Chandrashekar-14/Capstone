@@ -1,0 +1,103 @@
+/* General Page Styles */
+body {
+    background-image: url('/static/images/coplog.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: Arial, sans-serif;
+    padding: 50px 20px;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Page Heading */
+h1 {
+    text-align: center;
+    color: #34495e;
+    margin-bottom: 30px;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.card {
+    flex: 1;
+    min-width: 200px;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.card h2 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: #2c3e50;
+}
+
+.card p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #16a085;
+}
+
+/* Charts Section */
+.charts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.chart-container {
+    flex: 1;
+    min-width: 300px;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+table th {
+    background-color: #3498db;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .summary-cards, .charts {
+        flex-direction: column;
+    }
+}
