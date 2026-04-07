@@ -63,7 +63,7 @@
         <a href="{% url 'edit_profile' %}">
             <button style="
                 padding: 12px 25px; 
-                background-color: #3498db; 
+                background-color: #16a085; 
                 color: white; 
                 border: none; 
                 border-radius: 8px; 
@@ -75,15 +75,25 @@
                 gap: 8px;
                 transition: 0.3s;
             "
-            onmouseover="this.style.backgroundColor='#2980b9';"
-            onmouseout="this.style.backgroundColor='#3498db';">
+            onmouseover="this.style.backgroundColor='#138d75';"
+            onmouseout="this.style.backgroundColor='#16a085';">
                 ✏️ Edit Profile
             </button>
         </a>
     </div>
 
     <div style="margin: 20px 0;">
-    <a href="{% url 'student_dashboard' %}" class="btn btn-primary">⬅ Back</a>
+    <a href="{% url 'student_dashboard' %}" style="
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #16a085;
+        color: white;
+        font-weight: bold;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: 0.3s;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    " onmouseover="this.style.backgroundColor='#138d75';" onmouseout="this.style.backgroundColor='#16a085';"> ⬅ Back</a>
 </div>
 
 </div> <!-- End of profile-page -->

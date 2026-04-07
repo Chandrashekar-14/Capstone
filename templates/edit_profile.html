@@ -4,16 +4,90 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Profile</title>
+    <style>
+        body {
+            background-image: url("{% static 'images/coplog.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            padding: 50px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #34495e;
+            margin-bottom: 30px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #16a085;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #138d75;
+            transform: translateY(-2px);
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #16a085;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid #16a085;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        a:hover {
+            background-color: #16a085;
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-<h2>Edit Your Profile</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Changes</button>
-</form>
+<div class="container">
+    <h2>Edit Your Profile</h2>
 
-<a href="{% url 'student_dashboard' %}">Back to Dashboard</a>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <div style="text-align: center;">
+        <a href="{% url 'student_dashboard' %}">Back to Dashboard</a>
+    </div>
+</div>
+
 </body>
 </html>

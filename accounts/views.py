@@ -166,6 +166,13 @@ def placement_insights(request):
     company_values = list(company_counts.values())
 
     # -----------------------------
+    # Batch-wise placement distribution
+    # -----------------------------
+    batch_counts = Counter([s.year for s in students if s.placed])
+    batch_labels = sorted([f"Year {year}" for year in sorted(batch_counts.keys())])
+    batch_values = [batch_counts[int(label.split()[-1])] for label in batch_labels]
+
+    # -----------------------------
     # Readiness score distribution
     # -----------------------------
     bins = [0, 50, 60, 70, 80, 90, 100]
@@ -192,8 +199,8 @@ def placement_insights(request):
         'avg_readiness': avg_readiness,
         'company_labels': company_labels,
         'company_counts': company_values,
-        'readiness_labels': bin_labels,
-        'readiness_counts': readiness_counts,
+        'batch_labels': batch_labels,
+        'batch_counts': batch_values,
         'recent_placements': recent_placements,
     }
 

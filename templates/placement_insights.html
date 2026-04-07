@@ -94,7 +94,7 @@
             <canvas id="companyChart" width="400" height="300"></canvas>
         </div>
         <div class="chart-container">
-            <h2>Readiness Score Distribution</h2>
+            <h2>Batch wise Placement Distribution</h2>
             <canvas id="readinessChart" width="400" height="300"></canvas>
         </div>
     </div>
@@ -150,16 +150,16 @@
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
-    // Readiness Score Distribution
+    // Batch wise Placement Distribution
     const ctx2 = document.getElementById('readinessChart').getContext('2d');
     const readinessChart = new Chart(ctx2, {
         type: 'bar',
         data: {
-            labels: {{ readiness_labels|safe }},
+            labels: {{ batch_labels|safe }},
             datasets: [{
-                label: 'Number of Students',
-                data: {{ readiness_counts|safe }},
-                backgroundColor: '#27ae60'
+                label: 'Students Placed',
+                data: {{ batch_counts|safe }},
+                backgroundColor: '#16a085'
             }]
         },
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }

@@ -16,7 +16,7 @@ body.profile-page-bg {
     bottom: 20px;
     left: 20px;
     padding: 12px 25px;
-    background-color: #3498db;
+    background-color: #16a085;
     color: white;
     border: none;
     border-radius: 8px;
@@ -28,7 +28,7 @@ body.profile-page-bg {
 }
 
 #edit-profile-btn:hover {
-    background-color: #2980b9;
+    background-color: #138d75;
     transform: scale(1.05);
 }
 
@@ -36,6 +36,9 @@ body.profile-page-bg {
 .profile-page {
     max-width: 1200px;
     margin: 0 auto;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 15px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 30px;
@@ -50,12 +53,11 @@ body.profile-page-bg {
 
 /* Individual containers */
 .profile-container, .readiness-container {
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
-    color: white;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    color: #34495e;
     padding: 25px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 /* Left & right columns */
@@ -71,12 +73,11 @@ body.profile-page-bg {
 /* Achievements: full width */
 .achievements-container {
     width: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    color: white;
+    background:rgb(255 255 255 / 85%);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: black;
 }
 
 /* Headings */
@@ -85,14 +86,15 @@ body.profile-page-bg {
 .achievements-container h2 {
     margin-bottom: 15px;
     font-size: 22px;
-    border-bottom: 1px solid rgba(255,255,255,0.3);
+    color: #2c3e50;
+    border-bottom: 1px solid #e0e0e0;
     padding-bottom: 5px;
 }
 
 /* Placement progress bar */
 .readiness-container .progress-bar {
     width: 100%;
-    background: rgba(255,255,255,0.2);
+    background: #f0f0f0;
     border-radius: 25px;
     height: 25px;
     overflow: hidden;
@@ -108,6 +110,13 @@ body.profile-page-bg {
     color: white;
     line-height: 25px;
     font-weight: bold;
+}
+
+/* Additional text styling in containers */
+.profile-container p,
+.readiness-container p,
+.achievements-container p {
+    color: #34495e;
 }
 
 /* Achievements list */
